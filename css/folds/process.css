@@ -1,0 +1,178 @@
+/* ==========================================================================
+   Memory Parlour — Process fold
+   Fits one viewport: an upper text area (lede + numbered steps left, heading
+   top-right) and a video band that fills the lower area and bleeds off the
+   bottom edge (same treatment as the Home image). Base tokens, header, and the
+   fold framework live in base.css.
+   ========================================================================== */
+
+.process {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  /* Clear the fixed header; cream gutters L/R match the rest of the site. */
+  padding: calc(var(--header-h) + clamp(14px, 3vh, 30px)) var(--page-gutter) 0;
+  background: var(--color-bg);
+}
+
+/* --- Upper area: intro (left) | heading (right) ---------------------------- */
+.process__top {
+  position: relative;
+  z-index: 2; /* above the video band */
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: clamp(24px, 5vw, 80px);
+}
+
+.process__intro {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+/* Lede — bold italic serif, two lines, larger than the step text. */
+.process__lede {
+  max-width: 64ch;
+}
+
+.process__lede-line {
+  margin: 0;
+  font-family: var(--font-display);
+  font-style: italic;
+  font-weight: 600;
+  font-size: clamp(1.05rem, 1.9vw, 1.65rem);
+  line-height: 1.35;
+  letter-spacing: 0.01em;
+  color: var(--color-ink);
+}
+
+/* Numbered steps — italic serif; number + title on one line, description below. */
+.process__steps {
+  list-style: none;
+  margin: clamp(20px, 4vh, 44px) 0 0;
+  padding: 0;
+  max-width: 88ch;
+}
+
+.process__step {
+  margin-top: clamp(14px, 2.4vh, 26px);
+}
+
+.process__step:first-child { margin-top: 0; }
+
+.process__step-head {
+  font-family: var(--font-display);
+  font-style: italic;
+  font-weight: 500;
+  font-size: clamp(1rem, 1.5vw, 1.3rem);
+  line-height: 1.3;
+  letter-spacing: 0.01em;
+  color: var(--color-ink);
+  margin-bottom: 0.15em;
+}
+
+.process__step-num {
+  /* number + title share one line; a hair of space after the dot */
+  margin-right: 0.4em;
+}
+
+.process__step-desc {
+  margin: 0;
+  font-family: var(--font-display);
+  font-style: italic;
+  font-weight: 400;
+  font-size: clamp(0.92rem, 1.35vw, 1.15rem);
+  line-height: 1.45;
+  letter-spacing: 0.01em;
+  max-width: 70ch;
+  color: var(--color-ink);
+}
+
+/* Heading — bold sans, right-aligned (same pattern as Services/About). */
+.process__heading {
+  flex: 0 0 auto;
+  text-align: right;
+  line-height: 1.1;
+}
+
+.process__eyebrow {
+  font-family: var(--font-label);
+  font-weight: 400;
+  font-size: clamp(0.8rem, 1.1vw, 1rem);
+  letter-spacing: 0.04em;
+  color: var(--color-ink);
+  margin-bottom: 0.15em;
+}
+
+.process__title {
+  font-family: var(--font-label);
+  font-weight: 600;
+  font-size: clamp(1.4rem, 2.8vw, 2.4rem);
+  letter-spacing: 0.01em;
+  color: var(--color-ink);
+}
+
+/* --- Lower area: video band, bleeding off the bottom -----------------------
+   Anchored by its top with cream gutters L/R; its height runs past the fold's
+   bottom edge and is cropped by the 100vh fold boundary (overflow:hidden on
+   .fold). Same language as the Home hero image. */
+.process__video {
+  position: absolute;
+  left: var(--page-gutter);
+  right: var(--page-gutter);
+  top: clamp(52%, 56vh, 58%);
+  height: 60vh; /* extends past the bottom edge → bleeds, then crops */
+  overflow: hidden;
+}
+
+.process__media-el {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+/* Optional mute/unmute control if the video carries sound the user can enable. */
+.process__mute {
+  position: absolute;
+  right: clamp(10px, 1.4vw, 18px);
+  bottom: clamp(10px, 1.4vw, 18px);
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: rgba(28, 27, 22, 0.55);
+  color: var(--color-bg);
+  display: grid;
+  place-items: center;
+  backdrop-filter: blur(2px);
+  transition: background 180ms ease;
+}
+
+.process__mute:hover { background: rgba(28, 27, 22, 0.75); }
+.process__mute::before { content: "\1F50A"; font-size: 1rem; line-height: 1; }
+.process__mute.is-muted::before { content: "\1F507"; }
+
+/* ==========================================================================
+   Responsive — sensible defaults only (refined later). Stack heading above the
+   intro; pull the video band down a touch.
+   ========================================================================== */
+
+@media (max-width: 768px) {
+  .process {
+    padding-left: clamp(16px, 5vw, 28px);
+    padding-right: clamp(16px, 5vw, 28px);
+  }
+
+  .process__top {
+    flex-direction: column-reverse; /* heading sits above the lede */
+    gap: clamp(14px, 3vh, 26px);
+  }
+
+  .process__heading { text-align: left; }
+
+  .process__video {
+    left: clamp(12px, 4vw, 24px);
+    right: clamp(12px, 4vw, 24px);
+    top: 58%;
+  }
+}

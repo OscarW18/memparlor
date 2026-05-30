@@ -1,0 +1,17 @@
+{
+  "fold": "services",
+  "heading": {
+    "eyebrow": "What we",
+    "title": "Preserve"
+  },
+  "media": {
+    "type": "image",
+    "src": "/assets/images/services-media-placeholder.jpg",
+    "poster": "",
+    "autoplay": true,
+    "loop": true,
+    "muted": true,
+    "showMuteControl": false
+  },
+  "body": "services.md"
+}

@@ -1,0 +1,136 @@
+/* ==========================================================================
+   Memory Parlour — About Us fold
+   Video block (contained, Home-matching gutters + crop), the bottom two-column
+   band (poem left | heading right). Base tokens, header, and the fold/transition
+   framework live in base.css.
+   ========================================================================== */
+
+.about {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  /* Clear the fixed header at the top; cream gutters L/R match the Home image. */
+  padding: calc(var(--header-h) + clamp(14px, 3vh, 30px))
+           var(--page-gutter)
+           clamp(22px, 4.5vh, 48px);
+  background: var(--color-bg);
+}
+
+/* --- Video block (upper area) ----------------------------------------------
+   Contained landscape region — not bleeding off any edge. Cropped with
+   object-fit so it fills the band at any width; height sized so header + video
+   + bottom band all fit within 100vh. */
+.about__video {
+  position: relative;
+  flex: 0 0 auto;
+  height: clamp(40vh, 50vh, 54vh);
+  overflow: hidden;
+}
+
+.about__media-el {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+/* Mute/unmute control — small corner overlay (placement finalized in design pass). */
+.about__mute {
+  position: absolute;
+  right: clamp(10px, 1.4vw, 18px);
+  bottom: clamp(10px, 1.4vw, 18px);
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: rgba(28, 27, 22, 0.55);
+  color: var(--color-bg);
+  display: grid;
+  place-items: center;
+  backdrop-filter: blur(2px);
+  transition: background 180ms ease;
+}
+
+.about__mute:hover { background: rgba(28, 27, 22, 0.75); }
+
+/* Speaker glyph via pseudo-content; a slash overlays when muted. */
+.about__mute::before {
+  content: "\1F50A"; /* 🔊 */
+  font-size: 1rem;
+  line-height: 1;
+}
+
+.about__mute.is-muted::before { content: "\1F507"; /* 🔇 */ }
+
+/* --- Bottom band: poem (left) | heading (right) ----------------------------
+   Pushed to the bottom of the fold; cream gap above it fills the remaining space. */
+.about__bottom {
+  margin-top: auto;
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: clamp(24px, 5vw, 80px);
+  padding-top: clamp(20px, 4vh, 44px);
+}
+
+/* Poem — italic serif, left-aligned, exact line breaks preserved. */
+.about__poem {
+  max-width: 52ch;
+}
+
+.about__poem-line {
+  margin: 0;
+  font-family: var(--font-display);
+  font-style: italic;
+  font-weight: 400;
+  font-size: clamp(0.95rem, 1.5vw, 1.3rem);
+  line-height: 1.5;
+  letter-spacing: 0.01em;
+  color: var(--color-ink);
+}
+
+/* Heading — bold sans (distinct from the serif logo wordmark), right-aligned. */
+.about__heading {
+  text-align: right;
+  flex: 0 0 auto;
+  line-height: 1.1;
+}
+
+.about__eyebrow {
+  font-family: var(--font-label);
+  font-weight: 400;
+  font-size: clamp(0.8rem, 1.1vw, 1rem);
+  letter-spacing: 0.04em;
+  color: var(--color-ink);
+  margin-bottom: 0.15em;
+}
+
+.about__title {
+  font-family: var(--font-label);
+  font-weight: 600;
+  font-size: clamp(1.4rem, 2.8vw, 2.4rem);
+  letter-spacing: 0.01em;
+  color: var(--color-ink);
+}
+
+/* ==========================================================================
+   Responsive — sensible defaults only (refined later). Stack poem + heading,
+   shrink the video band.
+   ========================================================================== */
+
+@media (max-width: 768px) {
+  .about {
+    padding-left: clamp(16px, 5vw, 28px);
+    padding-right: clamp(16px, 5vw, 28px);
+  }
+
+  .about__video { height: clamp(30vh, 38vh, 42vh); }
+
+  .about__bottom {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: clamp(18px, 3.5vh, 32px);
+  }
+
+  .about__heading { text-align: left; }
+}

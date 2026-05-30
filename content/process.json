@@ -1,0 +1,34 @@
+{
+  "fold": "process",
+  "heading": {
+    "eyebrow": "How we",
+    "title": "Preserve"
+  },
+  "lede": [
+    "No two archives are approached the same way.",
+    "Each story is bespoke in nature, with care for the people, memories, and materials that make it uniquely yours."
+  ],
+  "steps": [
+    {
+      "title": "Listening",
+      "description": "We spend time with you, listening, sorting through memories, and understanding where the story lives."
+    },
+    {
+      "title": "Documenting",
+      "description": "Photographs, negatives, letters, recordings, and objects are carefully organised, scanned, and documented."
+    },
+    {
+      "title": "Shaping",
+      "description": "We slowly build the final archive, whether as a film, book, audio piece, or personal collection, preserving your memories in a way that feels true to you."
+    }
+  ],
+  "media": {
+    "type": "video",
+    "src": "",
+    "poster": "/assets/images/process-video-poster-placeholder.jpg",
+    "autoplay": true,
+    "loop": true,
+    "muted": true,
+    "showMuteControl": false
+  }
+}

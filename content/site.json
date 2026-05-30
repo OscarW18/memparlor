@@ -1,0 +1,16 @@
+{
+  "logo": {
+    "tagline": "PRESERVING FAMILY LEGACY",
+    "wordmark": "MEMORY PARLOUR",
+    "established": "EST. 2024",
+    "href": "/"
+  },
+  "nav": [
+    { "label": "HOME",       "path": "/",            "fold": "home" },
+    { "label": "ABOUT US",   "path": "/about-us",    "fold": "about" },
+    { "label": "SERVICES",   "path": "/services",    "fold": "services" },
+    { "label": "PROCESS",    "path": "/process",     "fold": "process" },
+    { "label": "FAQS",       "path": "/faqs",        "fold": "faqs" },
+    { "label": "CONTACT US", "path": "/contact-us",  "fold": "contact" }
+  ]
+}

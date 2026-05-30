@@ -1,0 +1,155 @@
+/* ==========================================================================
+   Memory Parlour — Services fold
+   Two-column layout: a scrollable services list (left) | a pinned column with
+   the heading + portrait media (right). The left list overflows the viewport
+   and scrolls internally; the fold controller hands off to Process/About at its
+   bottom/top edges. Base tokens, header, and the fold framework live in base.css.
+   ========================================================================== */
+
+.services {
+  width: 100%;
+  height: 100%;
+  display: grid;
+  grid-template-columns: 1fr clamp(280px, 36%, 460px);
+  gap: clamp(24px, 5vw, 80px);
+  /* Clear the fixed header; cream gutters L/R match the rest of the site. */
+  padding: calc(var(--header-h) + clamp(14px, 3vh, 30px))
+           var(--page-gutter)
+           clamp(22px, 4.5vh, 48px);
+  background: var(--color-bg);
+}
+
+/* --- Left column: scrollable services list --------------------------------
+   min-height:0 lets this grid cell shrink so its own overflow (not the page)
+   does the scrolling. The whole list is italic serif, matching the mockup. */
+.services__list {
+  min-height: 0;
+  overflow-y: auto;
+  padding-right: clamp(8px, 1.5vw, 24px);
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-ink-hairline) transparent;
+}
+
+.services__list::-webkit-scrollbar { width: 6px; }
+.services__list::-webkit-scrollbar-thumb {
+  background: var(--color-ink-hairline);
+  border-radius: 3px;
+}
+
+/* Service label (marked renders `## …:` to <h2>). */
+.services__list h2 {
+  font-family: var(--font-display);
+  font-style: italic;
+  font-weight: 600;
+  font-size: clamp(1.05rem, 1.7vw, 1.55rem);
+  line-height: 1.2;
+  letter-spacing: 0.01em;
+  margin-top: clamp(18px, 3vh, 34px);
+  margin-bottom: 0.3em;
+  color: var(--color-ink);
+}
+
+.services__list h2:first-child { margin-top: 0; }
+
+/* Service description (marked renders the paragraph to <p>). */
+.services__list p {
+  font-family: var(--font-display);
+  font-style: italic;
+  font-weight: 400;
+  font-size: clamp(0.95rem, 1.4vw, 1.2rem);
+  line-height: 1.5;
+  letter-spacing: 0.01em;
+  max-width: 48ch;
+  color: var(--color-ink);
+}
+
+/* --- Right column: heading (top) + media (below), pinned ------------------
+   The left cell scrolls internally, so this cell simply stays in place. */
+.services__col {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
+/* Heading — bold sans, right-aligned (same pattern as About's heading). */
+.services__heading {
+  text-align: right;
+  line-height: 1.1;
+  margin-bottom: clamp(16px, 3vh, 30px);
+  flex: 0 0 auto;
+}
+
+.services__eyebrow {
+  font-family: var(--font-label);
+  font-weight: 400;
+  font-size: clamp(0.8rem, 1.1vw, 1rem);
+  letter-spacing: 0.04em;
+  color: var(--color-ink);
+  margin-bottom: 0.15em;
+}
+
+.services__title {
+  font-family: var(--font-label);
+  font-weight: 600;
+  font-size: clamp(1.4rem, 2.8vw, 2.4rem);
+  letter-spacing: 0.01em;
+  color: var(--color-ink);
+}
+
+/* Media slot — portrait (taller than wide), fills remaining column height. */
+.services__media {
+  position: relative;
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.services__media-el {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+/* Optional mute/unmute control if the media becomes a video with sound. */
+.services__mute {
+  position: absolute;
+  right: clamp(10px, 1.4vw, 18px);
+  bottom: clamp(10px, 1.4vw, 18px);
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: rgba(28, 27, 22, 0.55);
+  color: var(--color-bg);
+  display: grid;
+  place-items: center;
+  backdrop-filter: blur(2px);
+  transition: background 180ms ease;
+}
+
+.services__mute:hover { background: rgba(28, 27, 22, 0.75); }
+.services__mute::before { content: "\1F50A"; font-size: 1rem; line-height: 1; }
+.services__mute.is-muted::before { content: "\1F507"; }
+
+/* ==========================================================================
+   Responsive — sensible defaults only (refined in a later mobile pass).
+   Columns stack; the media drops below the list. (True normal-scroll on mobile
+   is part of the deferred mobile polish.)
+   ========================================================================== */
+
+@media (max-width: 768px) {
+  .services {
+    grid-template-columns: 1fr;
+    gap: clamp(18px, 3.5vh, 32px);
+    padding-left: clamp(16px, 5vw, 28px);
+    padding-right: clamp(16px, 5vw, 28px);
+  }
+
+  .services__heading { text-align: left; }
+
+  .services__media {
+    flex: 0 0 auto;
+    height: clamp(34vh, 40vh, 46vh);
+  }
+}

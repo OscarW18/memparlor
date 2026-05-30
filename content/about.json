@@ -1,0 +1,24 @@
+{
+  "fold": "about",
+  "media": {
+    "type": "video",
+    "src": "",
+    "poster": "/assets/images/about-video-poster-placeholder.jpg",
+    "autoplay": true,
+    "loop": true,
+    "muted": true,
+    "showMuteControl": false
+  },
+  "poem": [
+    "We are the keepers of dinner-table folklore.",
+    "The cataloguers of grandmother's perfume.",
+    "The translators of the handwriting",
+    "no one can read anymore.",
+    "We do not collect the past.",
+    "We tend to it, slowly, save it to be savoured for years."
+  ],
+  "heading": {
+    "eyebrow": "Knowing",
+    "title": "The Memory Parlour"
+  }
+}

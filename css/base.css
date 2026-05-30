@@ -1,0 +1,249 @@
+/* ==========================================================================
+   Memory Parlour — base.css
+   Design tokens, reset, font setup, header (<site-nav>), the fold layout +
+   crossfade framework, and shared layout primitives.
+   All token values are PLACEHOLDERS — exact values land in the design-system pass.
+   ========================================================================== */
+
+:root {
+  /* --- Color (placeholder tokens) --- */
+  --color-bg:        #f7f5e7;   /* warm cream / ivory */
+  --color-ink:       #1c1b16;   /* near-black warm text */
+  --color-ink-soft:  #56534a;   /* muted ink for inactive nav, secondary text */
+  --color-ink-hairline: rgba(28, 27, 22, 0.18);
+
+  /* --- Type (placeholder faces) --- */
+  --font-display: "Cormorant Garamond", Georgia, "Times New Roman", serif;
+  --font-label:   "Jost", system-ui, -apple-system, Segoe UI, sans-serif;
+
+  /* --- Layout --- */
+  --header-h:     clamp(64px, 9vh, 96px);
+  --page-gutter:  clamp(20px, 5vw, 72px);
+  --fold-fade:    700ms;
+}
+
+/* --- Reset --- */
+*,
+*::before,
+*::after { box-sizing: border-box; }
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+}
+
+body {
+  /* Single page, one viewport tall — there is no normal page scroll. */
+  height: 100vh;
+  height: 100dvh;
+  overflow: hidden;
+  background: var(--color-bg);
+  color: var(--color-ink);
+  font-family: var(--font-label);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+img { display: block; max-width: 100%; }
+
+h1, h2, h3, p, figure { margin: 0; }
+
+a { color: inherit; text-decoration: none; }
+
+button {
+  font: inherit;
+  color: inherit;
+  background: none;
+  border: 0;
+  cursor: pointer;
+}
+
+/* ==========================================================================
+   Header — <site-nav> (transparent, identical on every fold)
+   ========================================================================== */
+
+site-nav {
+  position: fixed;
+  inset: 0 0 auto 0;
+  z-index: 100;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--page-gutter);
+  padding: clamp(18px, 3.2vh, 34px) var(--page-gutter);
+  pointer-events: none; /* let folds receive wheel/touch; re-enable on interactive bits */
+}
+
+site-nav a,
+site-nav button { pointer-events: auto; }
+
+/* --- Left: logo block --- */
+.logo {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  line-height: 1;
+  color: var(--color-ink);
+}
+
+.logo__tagline {
+  font-family: var(--font-label);
+  font-weight: 400;
+  font-size: clamp(0.4rem, 0.62vw, 0.5rem);
+  letter-spacing: 0.26em;
+  text-transform: uppercase;
+  margin-bottom: 0.35em;
+}
+
+.logo__wordmark {
+  font-family: var(--font-display);
+  font-weight: 500;
+  font-size: clamp(1.35rem, 2.4vw, 2rem);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  line-height: 0.95;
+}
+
+.logo__est {
+  font-family: var(--font-label);
+  font-weight: 400;
+  font-size: clamp(0.42rem, 0.64vw, 0.52rem);
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  /* Wide gap between EST. and 2024 — HTML collapses whitespace, so widen the
+     space between words rather than relying on literal spaces in the JSON. */
+  word-spacing: 1.4em;
+  margin-top: 0.5em;
+}
+
+/* --- Right: nav --- */
+.site-nav__list {
+  display: flex;
+  align-items: center;
+  gap: clamp(18px, 2.4vw, 40px);
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  margin-top: 0.4em;
+}
+
+.site-nav__link {
+  font-family: var(--font-label);
+  font-weight: 400;
+  font-size: clamp(0.66rem, 0.92vw, 0.82rem);
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--color-ink-soft);
+  padding-bottom: 2px;
+  transition: color 180ms ease;
+}
+
+.site-nav__link:hover { color: var(--color-ink); }
+
+.site-nav__link.is-active {
+  color: var(--color-ink);
+  font-weight: 500;
+}
+
+/* --- Hamburger (hidden on wide widths) --- */
+.site-nav__toggle {
+  display: none;
+  width: 32px;
+  height: 24px;
+  position: relative;
+  margin-top: 0.2em;
+}
+
+.site-nav__toggle span {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 1.5px;
+  background: var(--color-ink);
+  transition: transform 220ms ease, opacity 220ms ease;
+}
+
+.site-nav__toggle span:nth-child(1) { top: 4px; }
+.site-nav__toggle span:nth-child(2) { top: 11px; }
+.site-nav__toggle span:nth-child(3) { top: 18px; }
+
+/* ==========================================================================
+   Fold layout + crossfade framework
+   Six full-viewport folds layered on top of each other; only the active one
+   is visible. Navigation crossfades between them.
+   ========================================================================== */
+
+.folds {
+  position: fixed;
+  inset: 0;
+}
+
+.fold {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100vh;
+  height: 100dvh;
+  overflow: hidden;
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition: opacity var(--fold-fade) ease, visibility 0s linear var(--fold-fade);
+}
+
+.fold.is-active {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+  transition: opacity var(--fold-fade) ease, visibility 0s;
+}
+
+/* ==========================================================================
+   Responsive — sensible defaults only (refined in a later mobile pass).
+   Nav collapses to a hamburger + overlay on narrow widths.
+   ========================================================================== */
+
+@media (max-width: 768px) {
+  .site-nav__toggle { display: block; }
+
+  .site-nav__list {
+    position: fixed;
+    inset: 0;
+    flex-direction: column;
+    justify-content: center;
+    gap: clamp(20px, 4vh, 36px);
+    background: var(--color-bg);
+    margin: 0;
+    padding: var(--page-gutter);
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 260ms ease, visibility 0s linear 260ms;
+  }
+
+  site-nav.is-open .site-nav__list {
+    opacity: 1;
+    visibility: visible;
+    transition: opacity 260ms ease;
+  }
+
+  .site-nav__link { font-size: 1.1rem; }
+
+  /* Hamburger → X when open */
+  site-nav.is-open .site-nav__toggle { z-index: 1; }
+  site-nav.is-open .site-nav__toggle span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
+  site-nav.is-open .site-nav__toggle span:nth-child(2) { opacity: 0; }
+  site-nav.is-open .site-nav__toggle span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
+}
+
+/* ==========================================================================
+   Reduced motion — instant swaps, no fades.
+   ========================================================================== */
+
+@media (prefers-reduced-motion: reduce) {
+  .fold,
+  .fold.is-active { transition: none; }
+  .site-nav__list { transition: none; }
+  * { scroll-behavior: auto; }
+}

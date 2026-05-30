@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Memory Parlour — Preserving Family Legacy</title>
+
+  <!-- Fonts (placeholders — replaced in the design-system pass) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500;1,600&family=Jost:wght@300;400;500&display=swap"
+    rel="stylesheet"
+  />
+
+  <!-- Base styles + per-fold split -->
+  <link rel="stylesheet" href="/css/base.css" />
+  <link rel="stylesheet" href="/css/folds/home.css" />
+  <link rel="stylesheet" href="/css/folds/about.css" />
+  <link rel="stylesheet" href="/css/folds/services.css" />
+  <link rel="stylesheet" href="/css/folds/process.css" />
+</head>
+<body>
+  <!-- Shared header (renders its own markup from content/site.json) -->
+  <site-nav></site-nav>
+
+  <!-- Single page: six full-viewport folds layered on top of each other.
+       Only the active fold is visible; navigation crossfades between them. -->
+  <main id="folds" class="folds">
+    <!-- Home — real content, populated client-side by js/home.js -->
+    <section class="fold" data-fold="home" id="fold-home" aria-label="Home">
+      <div class="home" data-home-root>
+        <h1 class="home__headline" data-home-headline></h1>
+        <figure class="home__media" data-home-media></figure>
+      </div>
+    </section>
+
+    <!-- About Us — real content, populated client-side by js/about.js -->
+    <section class="fold" data-fold="about" id="fold-about" aria-label="About Us">
+      <div class="about" data-about-root>
+        <div class="about__video" data-about-media></div>
+        <div class="about__bottom">
+          <div class="about__poem" data-about-poem></div>
+          <div class="about__heading" data-about-heading></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Services — real content, populated client-side by js/services.js.
+         Internally-scrollable fold: the left list overflows; the controller
+         hands off to Process/About at the list's bottom/top edges. -->
+    <section class="fold" data-fold="services" id="fold-services" aria-label="Services">
+      <div class="services" data-services-root>
+        <div class="services__list" data-services-body></div>
+        <div class="services__col">
+          <div class="services__heading" data-services-heading></div>
+          <figure class="services__media" data-services-media></figure>
+        </div>
+      </div>
+    </section>
+
+    <!-- Process — real content, populated client-side by js/process.js.
+         Fits one viewport: text up top, a video band bleeding off the bottom. -->
+    <section class="fold" data-fold="process" id="fold-process" aria-label="Process">
+      <div class="process" data-process-root>
+        <div class="process__top">
+          <div class="process__intro">
+            <div class="process__lede" data-process-lede></div>
+            <ol class="process__steps" data-process-steps></ol>
+          </div>
+          <div class="process__heading" data-process-heading></div>
+        </div>
+        <div class="process__video" data-process-media></div>
+      </div>
+    </section>
+
+    <!-- Folds 5–6 — empty placeholder stubs (real content arrives later) -->
+    <section class="fold" data-fold="faqs" id="fold-faqs" aria-label="FAQs"></section>
+    <section class="fold" data-fold="contact" id="fold-contact" aria-label="Contact Us"></section>
+  </main>
+
+  <script src="/js/nav.js" defer></script>
+  <script src="/js/folds.js" defer></script>
+  <script src="/js/home.js" defer></script>
+  <script src="/js/about.js" defer></script>
+
+  <!-- Services is the first fold to render markdown (marked.js, from CDN).
+       Both load with defer, so marked is ready before services.js runs. -->
+  <script src="https://cdn.jsdelivr.net/npm/marked@12/marked.min.js" defer></script>
+  <script src="/js/services.js" defer></script>
+
+  <!-- Process — JSON only (no marked.js). -->
+  <script src="/js/process.js" defer></script>
+</body>
+</html>
