@@ -105,6 +105,7 @@
 }
 
 .process__title {
+  margin: 0; /* reset UA <h2> margins — the title is a real heading element */
   font-family: var(--font-label);
   font-weight: 600;
   font-size: clamp(1.4rem, 2.8vw, 2.4rem);

@@ -24,7 +24,7 @@
 .about__video {
   position: relative;
   flex: 0 0 auto;
-  height: clamp(40vh, 50vh, 54vh);
+  height: 50vh;
   overflow: hidden;
 }
 
@@ -106,6 +106,7 @@
 }
 
 .about__title {
+  margin: 0; /* reset UA <h2> margins — the title is a real heading element */
   font-family: var(--font-label);
   font-weight: 600;
   font-size: clamp(1.4rem, 2.8vw, 2.4rem);

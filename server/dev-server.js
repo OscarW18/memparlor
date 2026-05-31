@@ -44,7 +44,12 @@ const server = http.createServer((req, res) => {
   // Decode + strip query, then resolve safely inside ROOT (no path traversal).
   const urlPath = decodeURIComponent((req.url || '/').split('?')[0]);
   const resolved = path.normalize(path.join(ROOT, urlPath));
-  if (!resolved.startsWith(ROOT)) return send(res, 403, 'Forbidden');
+  // Guard against path traversal. A bare startsWith(ROOT) would also pass for a
+  // sibling dir sharing the prefix (e.g. <root>-private), so require the path to
+  // be ROOT itself or sit under ROOT + separator.
+  if (resolved !== ROOT && !resolved.startsWith(ROOT + path.sep)) {
+    return send(res, 403, 'Forbidden');
+  }
 
   fs.stat(resolved, (err, stats) => {
     if (!err && stats.isFile()) return serveFile(res, resolved);
