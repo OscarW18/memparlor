@@ -1,0 +1,138 @@
+/* ==========================================================================
+   FAQs fold — per-fold styles only (base.css owns tokens/header/fold framework).
+   Three regions: full-height left image | centered Q&A list | bottom-right
+   heading. Plus the FAQ-only header treatment: a see-through/knockout logo,
+   keyed off <html data-fold="faqs"> so it applies on enter and reverts on leave
+   with no JS theme-switching. See specdoc/faqs-fold.md.
+   ========================================================================== */
+
+.faqs {
+  display: grid;
+  grid-template-columns: clamp(260px, 34vw, 520px) 1fr;
+  width: 100%;
+  height: 100%;
+}
+
+/* --- Left: full-height image column (bleeds to left/top/bottom edges) --- */
+.faqs__image {
+  margin: 0;
+  height: 100%;
+  overflow: hidden;
+}
+
+.faqs__media-el {
+  width: 100%;
+  height: 100%;
+  object-fit: cover; /* object-position comes from media.position (inline) */
+  display: block;
+}
+
+/* --- Right: centered Q&A list + bottom-right heading share this region --- */
+.faqs__main {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  /* Clear the fixed header up top; gutter on the sides + bottom. */
+  padding: var(--header-h) var(--page-gutter) var(--page-gutter);
+}
+
+.faqs__list {
+  width: 100%;
+  max-width: 34rem;
+}
+
+.faqs__item + .faqs__item {
+  margin-top: clamp(20px, 3.4vh, 40px);
+}
+
+.faqs__question {
+  font-family: var(--font-display);
+  font-style: italic;
+  font-weight: 600;
+  font-size: clamp(1.1rem, 1.9vw, 1.7rem);
+  line-height: 1.15;
+  letter-spacing: 0.01em;
+  margin: 0 0 0.5em;
+}
+
+.faqs__answer-line {
+  font-family: var(--font-display);
+  font-style: italic;
+  font-weight: 400;
+  font-size: clamp(0.92rem, 1.15vw, 1.12rem);
+  line-height: 1.45;
+  color: var(--color-ink-soft);
+  margin: 0;
+}
+
+.faqs__answer-line + .faqs__answer-line {
+  margin-top: 0.5em;
+}
+
+/* --- Bottom-right heading ("The / Experience") --- */
+.faqs__heading {
+  position: absolute;
+  right: var(--page-gutter);
+  bottom: clamp(20px, 5vh, 56px);
+  text-align: right;
+  line-height: 1;
+}
+
+.faqs__eyebrow {
+  font-family: var(--font-label);
+  font-weight: 400;
+  font-size: clamp(0.7rem, 1vw, 0.9rem);
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--color-ink-soft);
+  margin-bottom: 0.4em;
+}
+
+.faqs__title {
+  font-family: var(--font-label);
+  font-weight: 500;
+  font-size: clamp(2.2rem, 5.2vw, 4.2rem);
+  letter-spacing: 0.01em;
+  text-transform: capitalize;
+}
+
+/* ==========================================================================
+   FAQ header treatment — see-through / knockout logo.
+   Fill the three logo text parts with the fold's left image via
+   background-clip:text (approximate fill — not pixel-aligned to the photo
+   behind; see spec §0.1). Gated on `is-knockout-ready` so the transparent
+   text-fill only turns on once js/faqs.js has published --knockout-image,
+   never leaving the logo invisible. Nav links stay default dark on cream.
+   ========================================================================== */
+
+html.is-knockout-ready[data-fold="faqs"] .logo__tagline,
+html.is-knockout-ready[data-fold="faqs"] .logo__wordmark,
+html.is-knockout-ready[data-fold="faqs"] .logo__est {
+  background-image: var(--knockout-image);
+  background-repeat: no-repeat;
+  background-size: cover;
+  background-position: var(--knockout-pos, left center);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
+}
+
+/* --- Responsive: stack image / Q&A / heading (sensible default only) --- */
+@media (max-width: 768px) {
+  .faqs {
+    grid-template-columns: 1fr;
+    grid-template-rows: 38vh 1fr;
+  }
+
+  .faqs__main {
+    padding: clamp(20px, 6vh, 48px) var(--page-gutter) var(--page-gutter);
+  }
+
+  .faqs__heading {
+    position: static;
+    text-align: left;
+    margin-top: clamp(20px, 4vh, 36px);
+  }
+}

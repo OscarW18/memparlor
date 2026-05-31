@@ -19,6 +19,7 @@
   <link rel="stylesheet" href="/css/folds/about.css" />
   <link rel="stylesheet" href="/css/folds/services.css" />
   <link rel="stylesheet" href="/css/folds/process.css" />
+  <link rel="stylesheet" href="/css/folds/faqs.css" />
 </head>
 <body>
   <!-- Shared header (renders its own markup from content/site.json) -->
@@ -74,8 +75,21 @@
       </div>
     </section>
 
-    <!-- Folds 5–6 — empty placeholder stubs (real content arrives later) -->
-    <section class="fold" data-fold="faqs" id="fold-faqs" aria-label="FAQs"></section>
+    <!-- FAQs — real content, populated client-side by js/faqs.js.
+         Three regions: full-height left image | centered Q&A | bottom-right
+         heading. The header's knockout logo (CSS, keyed on data-fold) is fed
+         this same image via the --knockout-image custom property. -->
+    <section class="fold" data-fold="faqs" id="fold-faqs" aria-label="FAQs">
+      <div class="faqs" data-faqs-root>
+        <figure class="faqs__image" data-faqs-media></figure>
+        <div class="faqs__main">
+          <div class="faqs__list" data-faqs-list></div>
+          <div class="faqs__heading" data-faqs-heading></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Fold 6 — empty placeholder stub (real content arrives later) -->
     <section class="fold" data-fold="contact" id="fold-contact" aria-label="Contact Us"></section>
   </main>
 
@@ -91,5 +105,9 @@
 
   <!-- Process — JSON only. -->
   <script src="/js/process.js" defer></script>
+
+  <!-- FAQs — Q&A + left image + knockout-logo feed. The ?dev focal-point picker
+       is fetched lazily by this script only when ?dev is present. -->
+  <script src="/js/faqs.js" defer></script>
 </body>
 </html>

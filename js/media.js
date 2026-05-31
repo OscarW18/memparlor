@@ -64,6 +64,10 @@
       img.src = media.src;
       img.alt = media.alt || '';
       img.loading = imgLoading || 'lazy';
+      // Crop control (opt-in): only set the inline styles when the content
+      // supplies them, so folds that rely on their own CSS aren't overridden.
+      if (media.fit) img.style.objectFit = media.fit;
+      if (media.position) img.style.objectPosition = media.position;
       el.appendChild(img);
       return null;
     }

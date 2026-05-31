@@ -1,0 +1,37 @@
+{
+  "fold": "faqs",
+  "heading": {
+    "eyebrow": "The",
+    "title": "Experience"
+  },
+  "media": {
+    "type": "image",
+    "src": "/assets/images/faqs-image-placeholder.jpg",
+    "alt": "Memory Parlour archival imagery",
+    "fit": "cover",
+    "position": "center"
+  },
+  "faqs": [
+    {
+      "question": "Is the process personalised?",
+      "answer": [
+        "Every archive is approached differently.",
+        "We spend time understanding your story, materials, and comfort levels before shaping the process around you. No two projects are handled the same way."
+      ]
+    },
+    {
+      "question": "Is my information kept private?",
+      "answer": [
+        "Absolutely!",
+        "Any personal material shared with us remains confidential and is never published or shared without your permission."
+      ]
+    },
+    {
+      "question": "What are the deliverables and timelines?",
+      "answer": [
+        "Each archive is unique, and timelines vary depending on the materials and scope of the project.",
+        "All deliverables, timelines, and expectations are discussed clearly beforehand."
+      ]
+    }
+  ]
+}

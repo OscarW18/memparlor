@@ -22,13 +22,14 @@ History API (no reload).
 |-------|------------|----------------|------------|---------------|
 | 1     | Home       | `/`            | `home`     | ✅ Built      |
 | 2     | About Us   | `/about-us`    | `about`    | ✅ Built      |
-| 3     | Services   | `/services`    | `services` | ⏳ Stub        |
-| 4     | Process    | `/process`     | `process`  | ⏳ Stub        |
+| 3     | Services   | `/services`    | `services` | ✅ Built      |
+| 4     | Process    | `/process`     | `process`  | ✅ Built      |
 | 5     | FAQs       | `/faqs`        | `faqs`     | ⏳ Stub        |
 | 6     | Contact Us | `/contact-us`  | `contact`  | ⏳ Stub        |
 
-Stubbed folds are empty `<section>`s so navigation is testable end-to-end; they
-get real content as their designs/specs arrive. Specs live in `specdoc/`.
+Stubbed folds (FAQs, Contact Us) are empty `<section>`s so navigation is testable
+end-to-end; they get real content as their designs/specs arrive. Specs live in
+`specdoc/` (FAQs already has one: `specdoc/faqs-fold.md`).
 
 ---
 
@@ -82,11 +83,13 @@ content/
   services.md              Services list, rendered by the in-repo markdown parser.
   process.json             Process fold content (lede + steps + video).
 assets/
-  images/                  Placeholder hero + video poster.
-  icons/
+  images/                  Placeholder hero + poster images (home/about/services/process).
+  icons/                   (empty — no icons/favicon committed yet)
 server/
   dev-server.js            Zero-dependency static server with SPA fallback.
-specdoc/                    Per-fold specifications (home, about, services, …).
+specdoc/                    Per-fold specifications: home, about, services, process,
+                           and faqs (the next fold to build).
+The Memory Parlour mockup images/   Source design mockups (PNG) the folds are built from.
 ```
 
 ---
@@ -213,6 +216,32 @@ video fields (an `image` type ignores them; a `video` type uses them):
 }
 ```
 
+**`content/services.json`** — heading + typed `media` (same shape as About) + a
+`body` pointer to a markdown file. The list copy lives in `content/services.md`
+and is rendered by the small in-repo markdown parser in `js/services.js` (`## h2`
++ blank-line paragraphs only — no third-party dependency):
+
+```json
+{
+  "heading": { "eyebrow": "What we", "title": "Preserve" },
+  "media": { "type": "image", "src": "…", … },
+  "body": "services.md"   // fetched + rendered into the scrollable left list
+}
+```
+
+**`content/process.json`** — heading + a two-line `lede` + ordered `steps` (the
+"1.", "2.", … numbering is derived from array order, not stored) + a typed video
+`media` for the bottom band:
+
+```json
+{
+  "heading": { "eyebrow": "How we", "title": "Preserve" },
+  "lede": ["line 1", "line 2"],                 // array preserves the line break
+  "steps": [ { "title": "Listening", "description": "…" }, … ],
+  "media": { "type": "video", "src": "", "poster": "…", … }
+}
+```
+
 ---
 
 ## Styling conventions
@@ -258,9 +287,10 @@ work automatically. Touch `folds.js` only to extend shared navigation behaviour.
   inject metadata per route.
 - **Deploy config** (`wrangler.jsonc`) — Cloudflare Workers deployment.
 - **Real design system** — final fonts, exact colors, spacing tokens.
-- **Final media assets** — hero image and the About video (the real video will
-  exceed the 25 MiB static cap, so it'll point at Cloudflare Stream or R2).
-- **Folds 3–6 content** — Services, Process, FAQs, Contact Us.
+- **Final media assets** — hero image and the About/Process videos (currently
+  poster-only placeholders with empty `src`; the real videos will exceed the
+  25 MiB static cap, so they'll point at Cloudflare Stream or R2).
+- **Folds 5–6 content** — FAQs, Contact Us (Home/About/Services/Process are built).
 - **Mobile polish** — current responsive behaviour is sensible defaults only.
 
 ---
