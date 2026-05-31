@@ -62,16 +62,25 @@ css/
   folds/
     home.css               Home-only: headline type + hero positioning/overlap.
     about.css              About-only: video block, poem, heading band.
+    services.css           Services-only: two-column scroll layout + media slot.
+    process.css            Process-only: lede/steps + bottom-bleeding video band.
 js/
   nav.js                   <site-nav> Web Component (logo + nav, active state).
   folds.js                 Fold controller: input handling, crossfade, URL sync,
-                           end-clamping, fold lifecycle hooks.
+                           end-clamping, fold lifecycle + scrollable hooks.
+  media.js                 Shared renderers: createMedia + createHeading, used by
+                           about/services/process (on window.MemoryParlour).
   home.js                  Home renderer (segmented headline + hero media).
   about.js                 About renderer (video + poem + heading).
+  services.js              Services renderer (heading + media + markdown list).
+  process.js               Process renderer (lede + numbered steps + video band).
 content/
   site.json                Shared logo + nav (single source of truth for routes).
   home.json                Home fold content.
   about.json               About fold content (introduces the video media type).
+  services.json            Services fold content (heading + media + body pointer).
+  services.md              Services list, rendered by the in-repo markdown parser.
+  process.json             Process fold content (lede + steps + video).
 assets/
   images/                  Placeholder hero + video poster.
   icons/
@@ -105,6 +114,7 @@ mirrored attribute. **Preserve this contract when adding folds.**
 | `fold:goto` | event on `document` | nav/logo → controller | `{ fold }` — request navigation |
 | `fold:change` | event on `document` | controller → anyone | `{ fold, path }` — active fold changed |
 | `<html data-fold="…">` | attribute | controller → anyone | mirrors the active fold id (read on first render) |
+| `registerScrollable(fold, el)` | JS call on `window.MemoryParlour` | fold → controller | registers an internally-scrollable region so nav hands off at its top/bottom edges |
 
 `<site-nav>` dispatches `fold:goto` on click and listens to `fold:change` to move
 its active highlight. The controller is the only thing that decides when a fold
@@ -263,7 +273,12 @@ work automatically. Touch `folds.js` only to extend shared navigation behaviour.
   `data-fold` mirror, and `registerFold`). They keep folds decoupled.
 - **No build step / no dependencies.** Don't introduce a framework or bundler.
   Keep using native Web Components, plain modules loaded with `<script defer>`,
-  and Node built-ins for tooling.
+  and Node built-ins for tooling. Markdown (e.g. `services.md`) is rendered by a
+  small in-repo parser in `js/services.js` — no third-party markdown library.
+- **Shared rendering** for the media block (image/video, lazy-load, mute control)
+  and the eyebrow+title heading lives in `js/media.js`
+  (`window.MemoryParlour.createMedia` / `createHeading`); reuse it when a new fold
+  needs either, rather than re-implementing per fold.
 - **Verify in a browser**, not just by reading code — the dev server plus a
   headless browser screenshot/DOM-dump catches layout and navigation regressions.
 - **Use the tokens** in `base.css`; treat colors/fonts as placeholders pending

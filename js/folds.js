@@ -102,8 +102,15 @@
     // Seat an internally-scrollable fold at the edge we're entering from: top
     // when moving forward/into it, bottom when arriving by scrolling back up —
     // so the next gesture continues through the list rather than skipping it.
+    // Seat at the list bottom only when arriving by a sequential backward
+    // scroll-step (opts.seat === 'edge'), so the next gesture continues through
+    // the list. Direct jumps (nav click, logo, fold:goto, popstate) call goTo
+    // without `seat` and always land at the top.
     const scrollEl = scrollables.get(route.fold);
-    if (scrollEl) scrollEl.scrollTop = clamped < prevIdx ? scrollEl.scrollHeight : 0;
+    if (scrollEl) {
+      scrollEl.scrollTop =
+        opts.seat === 'edge' && clamped < prevIdx ? scrollEl.scrollHeight : 0;
+    }
 
     if (changed) {
       if (prevRoute) lifecycles.get(prevRoute.fold)?.onLeave?.();
@@ -126,7 +133,7 @@
     }
   }
 
-  const step = (dir) => goTo(current + dir);
+  const step = (dir) => goTo(current + dir, { seat: 'edge' });
 
   // --- Wheel / trackpad: one gesture = one fold, momentum swallowed ----------
   // A trackpad flick is a dense, decaying stream of wheel events; the momentum
@@ -213,7 +220,15 @@
       scrollEl.scrollTop += dir * (page ? scrollEl.clientHeight * 0.9 : 60);
       return;
     }
+
+    // Debounce like wheel/touch: collapse OS key-autorepeat to one fold per
+    // crossfade so a held arrow can't race through folds (or flood history).
+    if (locked) return;
+    locked = true;
     step(dir);
+    setTimeout(() => {
+      locked = false;
+    }, FADE_MS);
   }
 
   function bindEvents() {

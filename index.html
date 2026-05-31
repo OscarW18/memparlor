@@ -81,15 +81,15 @@
 
   <script src="/js/nav.js" defer></script>
   <script src="/js/folds.js" defer></script>
+  <!-- Shared media + heading renderers, used by about/services/process. -->
+  <script src="/js/media.js" defer></script>
   <script src="/js/home.js" defer></script>
   <script src="/js/about.js" defer></script>
 
-  <!-- Services is the first fold to render markdown (marked.js, from CDN).
-       Both load with defer, so marked is ready before services.js runs. -->
-  <script src="https://cdn.jsdelivr.net/npm/marked@12/marked.min.js" defer></script>
+  <!-- Services renders markdown with an in-repo parser (no third-party dep). -->
   <script src="/js/services.js" defer></script>
 
-  <!-- Process — JSON only (no marked.js). -->
+  <!-- Process — JSON only. -->
   <script src="/js/process.js" defer></script>
 </body>
 </html>
