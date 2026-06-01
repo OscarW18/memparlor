@@ -1,0 +1,12 @@
+{
+  "fold": "contact",
+  "lede": "Begin Preserving Your Legacy.",
+  "body": [
+    "Book a call with us where we will discuss the possibilities and the ways to preserve your history for generations to come."
+  ],
+  "media": {
+    "type": "calendly",
+    "url": ""
+  },
+  "heading": { "eyebrow": "Tell us your", "title": "Story" }
+}

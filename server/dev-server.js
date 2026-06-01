@@ -40,9 +40,47 @@ function serveFile(res, filePath) {
   });
 }
 
+// Dev-only: persist a fold's image crop (media.position / media.zoom) so the
+// ?dev focal-point picker can "Save" straight to content/<fold>.json instead of
+// the user copy-pasting. Dev convenience only — there is no such endpoint on the
+// deployed static site, where the picker doesn't run anyway.
+function saveCrop(req, res) {
+  let body = '';
+  req.on('data', (chunk) => {
+    body += chunk;
+    if (body.length > 1e5) req.destroy(); // guard against runaway payloads
+  });
+  req.on('end', () => {
+    try {
+      const { fold, position, zoom } = JSON.parse(body || '{}');
+      // fold names map to content/<fold>.json — restrict the charset so this can
+      // never escape the content dir.
+      if (typeof fold !== 'string' || !/^[a-z][a-z0-9-]*$/.test(fold)) {
+        return send(res, 400, 'invalid fold');
+      }
+      const file = path.join(ROOT, 'content', `${fold}.json`);
+      const json = JSON.parse(fs.readFileSync(file, 'utf8'));
+      json.media = json.media || {};
+      if (typeof position === 'string' && /^[\d%.\s a-z-]+$/i.test(position)) {
+        json.media.position = position;
+      }
+      if (typeof zoom === 'number' && Number.isFinite(zoom)) {
+        json.media.zoom = zoom;
+      }
+      fs.writeFileSync(file, `${JSON.stringify(json, null, 2)}\n`);
+      send(res, 200, JSON.stringify({ ok: true }), 'application/json; charset=utf-8');
+    } catch (err) {
+      send(res, 400, `save failed: ${err.message}`);
+    }
+  });
+}
+
 const server = http.createServer((req, res) => {
   // Decode + strip query, then resolve safely inside ROOT (no path traversal).
   const urlPath = decodeURIComponent((req.url || '/').split('?')[0]);
+
+  if (req.method === 'POST' && urlPath === '/__dev/crop') return saveCrop(req, res);
+
   const resolved = path.normalize(path.join(ROOT, urlPath));
   // Guard against path traversal. A bare startsWith(ROOT) would also pass for a
   // sibling dir sharing the prefix (e.g. <root>-private), so require the path to

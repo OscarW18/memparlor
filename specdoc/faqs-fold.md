@@ -32,6 +32,17 @@ context but scoped to what we're building now.
 5. **Dev focal-point picker — build now, gated on `?dev`.** Loaded/activated only
    under `?dev`; since there's no build step yet it still lives on the static host
    (just never runs for normal visitors). True stripping waits for the SSR pass.
+   It pans (drag **+ a ▲▼◀▶ D-pad**) **and zooms** (**− / + buttons**), and has a
+   **Save** button that writes `position`/`zoom` to `content/faqs.json` via a
+   dev-server endpoint (`POST /__dev/crop`). See §5.
+6. **Zoom — added (reverses the earlier "no zoom" decision).** A numeric `zoom`
+   multiplier on the media object, **allowed below `1.0`** (image may shrink and
+   reveal the column's cream background). Implemented as `transform: scale()` with
+   origin tied to `position`; FAQ-only for now like `fit`/`position`. See §4.
+7. **Dev-mode navigation lock.** Whenever `?dev` is set, `js/folds.js` disables
+   **gesture** navigation (scroll, swipe, arrow/Page keys) for the session, so the
+   picker owns the arrow keys. Nav-bar/logo clicks and back/forward still work, so
+   you can move folds deliberately. Read once at load (a "dev session" flag).
    See §5.
 
 ---
@@ -101,13 +112,20 @@ no JS theme-switching. (No `data-header-theme` attribute is introduced; see §0.
 Extends the shared media object so any oversized image's crop is adjustable from
 content, no re-cropping the file:
 
-| Field      | Meaning                                  | Default    |
-|------------|------------------------------------------|------------|
-| `fit`      | CSS `object-fit`                         | `"cover"`  |
-| `position` | CSS `object-position` (the visible crop) | `"center"` |
+| Field      | Meaning                                          | Default    |
+|------------|--------------------------------------------------|------------|
+| `fit`      | CSS `object-fit`                                 | `"cover"`  |
+| `position` | CSS `object-position` (the visible crop)         | `"center"` |
+| `zoom`     | scale multiplier (`transform: scale()`)          | `1`        |
 
 - `position` accepts coordinates (`"50% 20%"` — x then y; `0%` = top/left,
   `100%` = bottom/right) or keywords (`"top"`, `"left center"`).
+- `zoom` is a numeric multiplier (`1` = no zoom). `>1` magnifies **into** the
+  focal point; `<1` shrinks the image within the frame (revealing the column's
+  cream background — gaps are allowed, per §0.6). Applied as
+  `transform: scale(zoom)` with `transform-origin` set to `position`, so zoom and
+  crop stay coherent. The media container clips overflow, so `>1` reads as a
+  tighter crop. Sensible range ~`0.2`–`5` (the picker clamps to this).
 - **Scope now: FAQ-only (see §0.4).** Added to the shared `createMedia` image
   branch and used on FAQs. The styles are applied **only when the field is
   present**, so the already-built folds' own CSS isn't overridden. Home/About/
@@ -115,18 +133,32 @@ content, no re-cropping the file:
   (including migrating `home.js` off its private media renderer) is a **dedicated
   later task**. Conceptually it still applies to any image/video — just not wired
   up everywhere yet.
-- **Zoom/scale is intentionally not included** (positioning only, per decision).
 
 ---
 
-## 5. Dev-only focal-point picker
+## 5. Dev-only focal-point + zoom picker
 
-A development aid for finding `position` values, **built now and gated on `?dev`**
-(see §0.5).
+A development aid for finding `position` and `zoom` values, **built now and gated
+on `?dev`** (see §0.5).
 
 - **Activation:** a `?dev` query flag (off by default).
-- **Behavior:** drag on the image to reposition the crop live; it displays the
-  resulting `object-position` string to copy into the fold's JSON.
+- **Behavior:** a small control panel (right side, clear of the left image):
+  - **Position** — a ▲▼◀▶ **D-pad** nudges the focal point (default 1%/click,
+    **Shift = 10%**), plus a center button that resets to `50% 50%`. The **arrow
+    keys ↑↓←→** do the same (Shift = 10%), and dragging on the image still works
+    for quick big moves. Arrow keys only act while the FAQ fold is showing.
+  - **Navigation lock:** while `?dev` is set, fold gesture-navigation is disabled
+    (§0.7) so the arrows pan instead of flipping folds; use the nav bar to change
+    folds, or reload without `?dev` to leave dev mode.
+  - **Zoom** — **− / +** buttons step the scale (default 0.05/click, **Shift =
+    0.25**) with the current value shown between them.
+  - **Save to faqs.json** — POSTs `{ fold, position, zoom }` to the dev server's
+    `POST /__dev/crop` endpoint, which writes `media.position`/`media.zoom`
+    straight into `content/faqs.json` — no copy-paste. Dev-server only; the
+    deployed static site has no such endpoint (and the picker doesn't run there),
+    so Save just reports a failure. The readout still shows the JSON values.
+  - No scroll-wheel or `±`-key zoom (buttons replace them), so nothing competes
+    with the fold controller's wheel/keyboard navigation.
 - **Implementation:** vanilla JS, loaded/activated only when the flag is present
   — no build step. **Note:** with no build/SSR layer yet, the file still lives on
   the static host; `?dev`-gating means it never runs for normal visitors, but it

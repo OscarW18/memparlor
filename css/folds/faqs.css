@@ -18,6 +18,8 @@
   margin: 0;
   height: 100%;
   overflow: hidden;
+  /* zoom < 1 shrinks the image within the frame; show cream behind it. */
+  background: var(--color-bg);
 }
 
 .faqs__media-el {

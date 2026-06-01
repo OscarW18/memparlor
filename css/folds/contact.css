@@ -1,0 +1,132 @@
+/* ==========================================================================
+   Contact fold — per-fold styles only (base.css owns tokens/header/fold
+   framework). Three regions: lede + body (left) | Calendly embed (right) |
+   eyebrow+title heading (bottom-right). Default dark-on-cream header (no
+   knockout). See specdoc/contact-fold.md.
+   ========================================================================== */
+
+.contact {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  width: 100%;
+  height: 100%;
+}
+
+/* --- Left: lede + body --- */
+.contact__text {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: clamp(14px, 2.4vh, 28px);
+  padding: var(--header-h) var(--page-gutter) var(--page-gutter);
+  max-width: 36rem;
+}
+
+.contact__lede {
+  font-family: var(--font-display);
+  font-style: italic;
+  font-weight: 500;
+  font-size: clamp(1.6rem, 3vw, 2.6rem);
+  line-height: 1.1;
+}
+
+.contact__body-line {
+  font-family: var(--font-display);
+  font-style: italic;
+  font-weight: 400;
+  font-size: clamp(0.95rem, 1.2vw, 1.18rem);
+  line-height: 1.45;
+  color: var(--color-ink-soft);
+}
+
+.contact__body-line + .contact__body-line {
+  margin-top: 0.5em;
+}
+
+/* --- Right: embed (fills the space) + heading beneath it (bottom-right) --- */
+.contact__main {
+  display: flex;
+  flex-direction: column;
+  padding: var(--header-h) var(--page-gutter) clamp(20px, 5vh, 56px);
+  min-width: 0;
+}
+
+.contact__embed {
+  flex: 1 1 auto;
+  width: 100%;
+  min-height: 0;
+}
+
+/* Calendly inline widget fills the embed slot; the iframe scrolls internally. */
+.contact__calendly {
+  width: 100%;
+  height: 100%;
+  min-height: 320px;
+}
+
+/* Empty-`url` state — neutral framed block until the real link is added. */
+.contact__calendly-placeholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  min-height: 320px;
+  border: 1px solid var(--color-ink-hairline);
+  color: var(--color-ink-soft);
+  font-family: var(--font-label);
+  font-size: 0.72rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+}
+
+.contact__heading {
+  flex: 0 0 auto;
+  margin-top: clamp(16px, 2.6vh, 30px);
+  text-align: right;
+  line-height: 1;
+}
+
+.contact__eyebrow {
+  font-family: var(--font-label);
+  font-weight: 400;
+  font-size: clamp(0.7rem, 1vw, 0.9rem);
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--color-ink-soft);
+  margin-bottom: 0.4em;
+}
+
+.contact__title {
+  font-family: var(--font-label);
+  font-weight: 500;
+  font-size: clamp(2.2rem, 5.2vw, 4.2rem);
+  letter-spacing: 0.01em;
+  text-transform: capitalize;
+}
+
+/* --- Responsive: stack text / embed / heading (sensible default only) --- */
+@media (max-width: 768px) {
+  .contact {
+    grid-template-columns: 1fr;
+    grid-template-rows: auto 1fr;
+    overflow-y: auto;
+  }
+
+  .contact__text {
+    padding: calc(var(--header-h) + 4vh) var(--page-gutter) clamp(16px, 3vh, 28px);
+  }
+
+  .contact__main {
+    padding: 0 var(--page-gutter) clamp(20px, 4vh, 40px);
+  }
+
+  .contact__calendly,
+  .contact__calendly-placeholder {
+    height: 60vh;
+  }
+
+  .contact__heading {
+    text-align: left;
+  }
+}

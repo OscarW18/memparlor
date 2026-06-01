@@ -20,6 +20,7 @@
   <link rel="stylesheet" href="/css/folds/services.css" />
   <link rel="stylesheet" href="/css/folds/process.css" />
   <link rel="stylesheet" href="/css/folds/faqs.css" />
+  <link rel="stylesheet" href="/css/folds/contact.css" />
 </head>
 <body>
   <!-- Shared header (renders its own markup from content/site.json) -->
@@ -89,8 +90,22 @@
       </div>
     </section>
 
-    <!-- Fold 6 — empty placeholder stub (real content arrives later) -->
-    <section class="fold" data-fold="contact" id="fold-contact" aria-label="Contact Us"></section>
+    <!-- Contact Us — real content, populated client-side by js/contact.js.
+         Three regions: lede + body (left) | Calendly inline embed (right) |
+         heading (bottom-right). The embed is lazy-loaded on first enter via the
+         fold lifecycle; empty url → placeholder block. -->
+    <section class="fold" data-fold="contact" id="fold-contact" aria-label="Contact Us">
+      <div class="contact" data-contact-root>
+        <div class="contact__text">
+          <p class="contact__lede" data-contact-lede></p>
+          <div class="contact__body" data-contact-body></div>
+        </div>
+        <div class="contact__main">
+          <div class="contact__embed" data-contact-media></div>
+          <div class="contact__heading" data-contact-heading></div>
+        </div>
+      </div>
+    </section>
   </main>
 
   <script src="/js/nav.js" defer></script>
@@ -109,5 +124,8 @@
   <!-- FAQs — Q&A + left image + knockout-logo feed. The ?dev focal-point picker
        is fetched lazily by this script only when ?dev is present. -->
   <script src="/js/faqs.js" defer></script>
+
+  <!-- Contact Us — lede + body + lazy Calendly inline embed. -->
+  <script src="/js/contact.js" defer></script>
 </body>
 </html>

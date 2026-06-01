@@ -41,13 +41,20 @@
   };
 
   /**
-   * Build the media element for a fold and, for video, return activation
-   * controls (else null). Mirrors the typed `media` model:
-   *   - image → renders with the given `imgLoading` (default 'lazy'); returns null.
+   * Build the media element for a fold and, for activation-driven types, return
+   * { activate, deactivate } controls (else null). Mirrors the typed `media` model:
+   *   - image → renders with the given `imgLoading` (default 'lazy'), plus the
+   *     opt-in `fit`/`position`/`zoom` crop control (`zoom` is a scale
+   *     multiplier whose origin tracks `position`); returns null.
    *   - video → poster shows immediately; `src` is lazy-attached on the first
    *     activation; the element always starts muted so autoplay isn't blocked;
    *     an optional mute/unmute control is rendered when `showMuteControl`.
-   * Class hooks: `${prefix}__media-el` and `${prefix}__mute`.
+   *   - calendly → inline scheduling embed; the Calendly script is injected and
+   *     the widget initialised on first `activate` (guarded), so the third-party
+   *     script stays off the initial load. Empty `url` → a neutral placeholder
+   *     block (no script). `deactivate` is a no-op (the iframe persists hidden).
+   * Class hooks: `${prefix}__media-el`, `${prefix}__mute`, `${prefix}__calendly`,
+   * `${prefix}__calendly-placeholder`.
    *
    * @param {Element} el  container (cleared before rendering)
    * @param {object|null|undefined} media  typed media object
@@ -68,8 +75,63 @@
       // supplies them, so folds that rely on their own CSS aren't overridden.
       if (media.fit) img.style.objectFit = media.fit;
       if (media.position) img.style.objectPosition = media.position;
+      // Zoom (opt-in): a scale multiplier (1 = no zoom; >1 magnifies into the
+      // focal point, <1 shrinks the image within the frame). Origin tracks
+      // `position` so it zooms toward the crop you framed. The fold's media
+      // container must clip overflow for >1 to read as a tighter crop.
+      if (typeof media.zoom === 'number' && media.zoom !== 1) {
+        img.style.transform = `scale(${media.zoom})`;
+        img.style.transformOrigin = media.position || 'center';
+      }
       el.appendChild(img);
       return null;
+    }
+
+    // Calendly inline embed. Build the container now; defer the third-party
+    // script + widget init to the first activation (see js/contact.js).
+    if (media.type === 'calendly') {
+      const hasUrl = typeof media.url === 'string' && media.url !== '';
+
+      if (!hasUrl) {
+        // No-URL state: a neutral placeholder block, no script ever loaded.
+        const placeholder = document.createElement('div');
+        placeholder.className = `${prefix}__calendly-placeholder`;
+        placeholder.textContent = 'Scheduling opens here.';
+        el.appendChild(placeholder);
+        return { activate() {}, deactivate() {} };
+      }
+
+      const widget = document.createElement('div');
+      widget.className = `${prefix}__calendly`;
+      el.appendChild(widget);
+
+      const SCRIPT_SRC = 'https://assets.calendly.com/assets/external/widget.js';
+      let inited = false;
+      const initWidget = () => {
+        window.Calendly?.initInlineWidget?.({ url: media.url, parentElement: widget });
+      };
+
+      return {
+        activate() {
+          if (inited) return; // init exactly once on the first enter
+          inited = true;
+          if (window.Calendly) {
+            initWidget();
+            return;
+          }
+          const existing = document.querySelector(`script[src="${SCRIPT_SRC}"]`);
+          if (existing) {
+            existing.addEventListener('load', initWidget, { once: true });
+            return;
+          }
+          const s = document.createElement('script');
+          s.src = SCRIPT_SRC;
+          s.async = true;
+          s.addEventListener('load', initWidget, { once: true });
+          document.head.appendChild(s);
+        },
+        deactivate() {}, // iframe persists in the hidden fold — nothing to tear down
+      };
     }
 
     if (media.type !== 'video') return null;

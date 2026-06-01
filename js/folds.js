@@ -25,6 +25,12 @@
   let current = 0;
   let locked = false; // touch gesture lock
 
+  // Dev mode (?dev): the FAQ crop picker owns scroll/swipe/arrow input, so we
+  // disable gesture navigation for the session. Nav-bar/logo clicks (fold:goto)
+  // and back/forward (popstate) stay live. Read once at load — not re-evaluated
+  // per event, so the query string dropping off on pushState can't unlock it.
+  const navLocked = new URLSearchParams(location.search).has('dev');
+
   // Wheel state (timestamp-based; no timers that a busy event stream can starve).
   let wheelArmed = true; // ready to accept the next step
   let lastWheelAt = 0;
@@ -145,6 +151,7 @@
   // All conditions key off event timestamps — nothing a continuous stream can
   // starve — which is what caused the previous idle-timer lock-up.
   function onWheel(e) {
+    if (navLocked) return; // dev mode: don't navigate (and don't swallow the event)
     e.preventDefault();
     const now = e.timeStamp;
     const abs = Math.abs(e.deltaY);
@@ -189,6 +196,7 @@
     if (e.cancelable) e.preventDefault();
   }
   function onTouchEnd(e) {
+    if (navLocked) return; // dev mode: swipes don't change folds
     if (touchStartY === null) return;
     const dy = e.changedTouches[0].clientY - touchStartY;
     touchStartY = null;
@@ -208,6 +216,9 @@
   // On an internally-scrollable fold, arrows/page keys scroll the region first
   // and only advance once it's at the edge in that direction.
   function onKeyDown(e) {
+    // Dev mode: leave arrow/page keys for the FAQ crop picker (don't navigate or
+    // preventDefault here, so the picker's own keydown handler can act on them).
+    if (navLocked) return;
     const dir = e.key === 'ArrowDown' || e.key === 'PageDown' ? 1
       : e.key === 'ArrowUp' || e.key === 'PageUp' ? -1
       : 0;

@@ -24,12 +24,13 @@ History API (no reload).
 | 2     | About Us   | `/about-us`    | `about`    | ✅ Built      |
 | 3     | Services   | `/services`    | `services` | ✅ Built      |
 | 4     | Process    | `/process`     | `process`  | ✅ Built      |
-| 5     | FAQs       | `/faqs`        | `faqs`     | ⏳ Stub        |
-| 6     | Contact Us | `/contact-us`  | `contact`  | ⏳ Stub        |
+| 5     | FAQs       | `/faqs`        | `faqs`     | ✅ Built      |
+| 6     | Contact Us | `/contact-us`  | `contact`  | ✅ Built      |
 
-Stubbed folds (FAQs, Contact Us) are empty `<section>`s so navigation is testable
-end-to-end; they get real content as their designs/specs arrive. Specs live in
-`specdoc/` (FAQs already has one: `specdoc/faqs-fold.md`).
+All six folds are built. The per-fold specs they were built from live in
+`specdoc/`; they remain the source of truth for content, layout, and scope
+(including what each fold explicitly defers — e.g. the real Calendly URL and
+final media assets).
 
 ---
 
@@ -65,16 +66,22 @@ css/
     about.css              About-only: video block, poem, heading band.
     services.css           Services-only: two-column scroll layout + media slot.
     process.css            Process-only: lede/steps + bottom-bleeding video band.
+    faqs.css               FAQs-only: 3-region layout + knockout-logo header treatment.
+    contact.css            Contact-only: text | embed | heading 3-region layout.
 js/
   nav.js                   <site-nav> Web Component (logo + nav, active state).
   folds.js                 Fold controller: input handling, crossfade, URL sync,
                            end-clamping, fold lifecycle + scrollable hooks.
   media.js                 Shared renderers: createMedia + createHeading, used by
-                           about/services/process (on window.MemoryParlour).
+                           about/services/process/faqs/contact (on window.MemoryParlour).
   home.js                  Home renderer (segmented headline + hero media).
   about.js                 About renderer (video + poem + heading).
   services.js              Services renderer (heading + media + markdown list).
   process.js               Process renderer (lede + numbered steps + video band).
+  faqs.js                  FAQs renderer (left image + Q&A + heading; feeds the
+                           knockout logo; lazy-loads the dev picker under ?dev).
+  faqs-dev-picker.js       Dev-only focal-point picker (loaded only under ?dev).
+  contact.js               Contact renderer (lede + body + lazy Calendly embed).
 content/
   site.json                Shared logo + nav (single source of truth for routes).
   home.json                Home fold content.
@@ -82,13 +89,17 @@ content/
   services.json            Services fold content (heading + media + body pointer).
   services.md              Services list, rendered by the in-repo markdown parser.
   process.json             Process fold content (lede + steps + video).
+  faqs.json                FAQs fold content (heading + media w/ crop + Q&A pairs).
+  contact.json             Contact fold content (lede + body + calendly media).
 assets/
-  images/                  Placeholder hero + poster images (home/about/services/process).
+  images/                  Placeholder hero + poster images (home/about/services/
+                           process/faqs).
   icons/                   (empty — no icons/favicon committed yet)
 server/
-  dev-server.js            Zero-dependency static server with SPA fallback.
+  dev-server.js            Zero-dependency static server with SPA fallback, plus a
+                           dev-only POST /__dev/crop endpoint (the ?dev picker's Save).
 specdoc/                    Per-fold specifications: home, about, services, process,
-                           and faqs (the next fold to build).
+                           faqs, contact.
 The Memory Parlour mockup images/   Source design mockups (PNG) the folds are built from.
 ```
 
@@ -242,6 +253,60 @@ and is rendered by the small in-repo markdown parser in `js/services.js` (`## h2
 }
 ```
 
+**`content/faqs.json`** — heading + an image `media` with the **crop control**
+(`fit`/`position`, see below) + an array of Q&A pairs whose `answer` is itself an
+array of paragraphs (so the punchy opener → elaboration break is preserved):
+
+```json
+{
+  "heading": { "eyebrow": "The", "title": "Experience" },
+  "media": {
+    "type": "image", "src": "…", "alt": "…",
+    "fit": "cover",            // optional → object-fit (applied only when present)
+    "position": "center"       // optional → object-position (the visible crop)
+  },
+  "faqs": [
+    { "question": "…", "answer": ["punchy line", "elaboration…"] }, …
+  ]
+}
+```
+
+The same `media.src` feeds the FAQ header's **see-through/knockout logo** (the
+logo letters are filled with this image via `background-clip: text`), passed to
+the header as the `--knockout-image` custom property. A dev-only focal-point
+picker for tuning `position` loads only under the `?dev` query flag.
+
+**`media` crop control (`fit`/`position`/`zoom`)** — `createMedia` applies
+`object-fit`/`object-position` (and a `transform: scale()` from `zoom`, origin
+tied to `position`) from these fields **only when present**, so it's opt-in and
+doesn't override a fold's own CSS. `zoom` is a numeric multiplier (`1` = none;
+`>1` magnifies into the focal point, `<1` shrinks within the frame). Currently
+wired for FAQs — tune `position`+`zoom` live with the `?dev` picker (drag, a
+▲▼◀▶ D-pad, or the **arrow keys** to pan; − / + buttons to zoom; a **Save** button
+that writes back to `faqs.json` via the dev server's `POST /__dev/crop`). While
+`?dev` is set, `js/folds.js` disables gesture navigation (scroll/swipe/arrows) so
+the arrows pan instead of changing folds — nav-bar clicks still work. Rolling the
+crop control out to every fold (and migrating `home.js` onto the shared renderer)
+is a later task.
+
+**`content/contact.json`** — a single-line `lede` + a `body` paragraph array + a
+`calendly` media embed + heading:
+
+```json
+{
+  "lede": "Begin Preserving Your Legacy.",
+  "body": ["paragraph 1", … ],            // array, same convention as elsewhere
+  "media": { "type": "calendly", "url": "" },   // empty url → placeholder block
+  "heading": { "eyebrow": "Tell us your", "title": "Story" }
+}
+```
+
+The `calendly` type is the third `media` variant (alongside `image`/`video`).
+`createMedia` builds the inline-embed container and returns `{activate, deactivate}`;
+`contact.js` wires those to `registerFold`, so the Calendly CDN script is injected
+and the widget initialised **on first enter** (once) — not on page load. An empty
+`url` renders a neutral placeholder and never loads the script.
+
 ---
 
 ## Styling conventions
@@ -261,8 +326,8 @@ and is rendered by the small in-repo markdown parser in `js/services.js` (`## h2
 
 ## Adding a new fold
 
-The shell is built to make this incremental. To fill a stubbed fold (e.g.
-`services`):
+The shell is built to make this incremental. All six current folds are built, but
+the same recipe applies to any future fold (using `services` as the example):
 
 1. **Content** — add `content/services.json`.
 2. **Markup** — in `index.html`, replace the empty
@@ -287,10 +352,19 @@ work automatically. Touch `folds.js` only to extend shared navigation behaviour.
   inject metadata per route.
 - **Deploy config** (`wrangler.jsonc`) — Cloudflare Workers deployment.
 - **Real design system** — final fonts, exact colors, spacing tokens.
-- **Final media assets** — hero image and the About/Process videos (currently
-  poster-only placeholders with empty `src`; the real videos will exceed the
-  25 MiB static cap, so they'll point at Cloudflare Stream or R2).
-- **Folds 5–6 content** — FAQs, Contact Us (Home/About/Services/Process are built).
+- **Final media assets** — hero image, the About/Process videos, and the FAQ
+  image (currently placeholders; the About/Process videos are poster-only with
+  empty `src` and the real ones will exceed the 25 MiB static cap, so they'll
+  point at Cloudflare Stream or R2).
+- **Real Calendly URL** — the Contact embed shows a placeholder until
+  `contact.json`'s `media.url` is set; the live widget then lazy-loads on first
+  enter. Third-party consent/cookie handling for the embed is also out of scope
+  for now.
+- **`fit`/`position` crop control rollout** — currently wired for FAQs only;
+  extend to every fold and migrate `home.js` onto the shared `createMedia`.
+- **FAQ knockout polish** — the see-through logo is an approximate CSS fill; a
+  geometry-aligned cut-out and true production-stripping of the `?dev` picker
+  (needs the SSR pass) come later.
 - **Mobile polish** — current responsive behaviour is sensible defaults only.
 
 ---
@@ -305,10 +379,11 @@ work automatically. Touch `folds.js` only to extend shared navigation behaviour.
   Keep using native Web Components, plain modules loaded with `<script defer>`,
   and Node built-ins for tooling. Markdown (e.g. `services.md`) is rendered by a
   small in-repo parser in `js/services.js` — no third-party markdown library.
-- **Shared rendering** for the media block (image/video, lazy-load, mute control)
-  and the eyebrow+title heading lives in `js/media.js`
-  (`window.MemoryParlour.createMedia` / `createHeading`); reuse it when a new fold
-  needs either, rather than re-implementing per fold.
+- **Shared rendering** for the media block (image / video / calendly embed,
+  lazy-load, mute control, and the opt-in `fit`/`position` crop control) and the
+  eyebrow+title heading lives in `js/media.js` (`window.MemoryParlour.createMedia`
+  / `createHeading`); reuse it when a new fold needs either, rather than
+  re-implementing per fold.
 - **Verify in a browser**, not just by reading code — the dev server plus a
   headless browser screenshot/DOM-dump catches layout and navigation regressions.
 - **Use the tokens** in `base.css`; treat colors/fonts as placeholders pending
