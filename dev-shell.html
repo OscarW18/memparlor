@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Memory Parlour — ?dev mobile layout shell</title>
+  <meta name="robots" content="noindex, nofollow" />
+
+  <!-- DEV-ONLY tool. Never linked from the live site. Authors the MOBILE block
+       layout of any fold by hosting the real site in a phone-width <iframe> (so the
+       true @media cascade fires) and driving the in-frame agent over postMessage.
+       Inert without a dev server (the auth probe returns no-server). -->
+  <link rel="stylesheet" href="/css/dev-shell.css" />
+
+  <!-- Auth core runs the passphrase flow ONCE here; the same-origin iframe inherits
+       the key from sessionStorage and unlocks silently. Must load before the shell. -->
+  <script src="/js/dev/dev-auth.js" defer></script>
+  <script src="/js/dev/dev-shell.js" defer></script>
+</head>
+<body>
+  <div data-shell-root>
+    <div class="shell-inert">Authenticating…</div>
+  </div>
+</body>
+</html>
