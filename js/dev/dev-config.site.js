@@ -69,6 +69,9 @@
     },
   };
 
+  // The mobile preview shell is layout-only — no nav editor inside the frame.
+  if (new URLSearchParams(location.search).has('shell')) return;
+
   // --- Floating "NAV" toggle: build the editor on first open, then show/hide ---
   let handle = null;
   let on = false;

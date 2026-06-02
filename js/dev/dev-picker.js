@@ -12,8 +12,9 @@
    The dev controller calls buildPicker on fold-enter and destroy() on fold-leave,
    so exactly one picker exists at a time and switching folds reframes the panel.
 
-   Controls: drag, ▲▼◀▶ D-pad and arrow keys (Shift = coarse), − / + zoom, and a
-   Save button that POSTs { fold, position, zoom } to /__dev/crop.
+   Controls: ▲▼◀▶ D-pad and arrow keys (Shift = coarse), − / + zoom, and a
+   Save button that POSTs { fold, position, zoom } to /__dev/crop. Repositioning
+   is panel-only — the media itself is not mouse-draggable.
    ========================================================================== */
 
 (() => {
@@ -62,7 +63,7 @@
     let posX;
     let posY;
     let zoom = parseZoom(img.style.transform);
-    let dirty = false; // true after any user adjust (drag / D-pad / arrows / zoom); gates master save
+    let dirty = false; // true after any user adjust (D-pad / arrows / zoom); gates master save
     if (mode === 'object') {
       [posX, posY] = parsePos(img.style.objectPosition || getComputedStyle(img).objectPosition);
     } else {
@@ -178,28 +179,6 @@
       dirty = true;
     }
 
-    // --- Drag ------------------------------------------------------------------
-    let dragging = false;
-    img.style.cursor = 'crosshair';
-    const posFromEvent = (e) => {
-      const r = img.getBoundingClientRect();
-      posX = clamp(((e.clientX - r.left) / r.width) * 100, 0, 100);
-      posY = clamp(((e.clientY - r.top) / r.height) * 100, 0, 100);
-    };
-    const onImgPointerDown = (e) => {
-      dragging = true;
-      img.setPointerCapture?.(e.pointerId);
-      posFromEvent(e);
-      apply();
-      e.preventDefault();
-    };
-    const onImgPointerMove = (e) => { if (dragging) { posFromEvent(e); apply(); } };
-    const stop = () => { dragging = false; };
-    img.addEventListener('pointerdown', onImgPointerDown);
-    img.addEventListener('pointermove', onImgPointerMove);
-    img.addEventListener('pointerup', stop);
-    img.addEventListener('pointercancel', stop);
-
     // --- Arrow keys (Shift = coarse) — only on this fold, not while editing ----
     const ARROWS = { ArrowUp: [0, -1], ArrowDown: [0, 1], ArrowLeft: [-1, 0], ArrowRight: [1, 0] };
     const onWinKeyDown = (e) => {
@@ -216,9 +195,9 @@
     apply();
     dirty = false; // the initial apply() seeds from the element — not a user edit
 
-    // Teardown: remove the panel + every listener this build added, and reset the
-    // image's dev-only cursor. The crop transform/objectPosition are left in place
-    // (that's the live crop being authored, possibly saved).
+    // Teardown: remove the panel + every listener this build added. The crop
+    // transform/objectPosition are left in place (that's the live crop being
+    // authored, possibly saved).
     return {
       // Master-save hook: same payload as the Save button, but only when the dev
       // actually moved/zoomed — otherwise we'd write an identity crop into folds
@@ -243,11 +222,6 @@
       destroy() {
         panel.remove();
         window.removeEventListener('keydown', onWinKeyDown);
-        img.removeEventListener('pointerdown', onImgPointerDown);
-        img.removeEventListener('pointermove', onImgPointerMove);
-        img.removeEventListener('pointerup', stop);
-        img.removeEventListener('pointercancel', stop);
-        img.style.cursor = '';
       },
     };
   };

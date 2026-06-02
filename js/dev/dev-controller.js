@@ -31,11 +31,32 @@
     mountedFold = null;
   };
 
+  // --- Mobile preview shell (?dev&shell) ------------------------------------
+  // Mount the iframe-side agent INSTEAD of the in-page panels (and suppress SAVE
+  // ALL below — the shell parent owns saving). The picker/editor/layout/media cores
+  // still load but stay idle: we simply never call their builders in shell mode.
+  const SHELL = new URLSearchParams(location.search).has('shell');
+  let agentMounted = false;
+  const mountAgent = () => {
+    if (agentMounted) return;
+    agentMounted = true;
+    // The agent is a singleton that self-manages fold changes (so the parent
+    // postMessage channel survives crossfades) — build it exactly once. Inject the
+    // core on demand; the renderers' _devLoaded lists stay unchanged.
+    if (NS.buildAgent) { NS.buildAgent(); return; }
+    const s = document.createElement('script');
+    s.src = '/js/dev/dev-agent.js';
+    s.async = false;
+    s.onload = () => NS.buildAgent?.();
+    document.body.appendChild(s);
+  };
+
   // Build the panels for `fold` (picker if it has an image, editor if it has an
   // editor). No-op if already mounted for this fold; tears down the previous fold
   // first otherwise. Builders return null when their target DOM isn't ready.
   const mount = (fold) => {
     if (!NS.devUnlocked) return; // gated by the passphrase (see dev-auth.js)
+    if (SHELL) return mountAgent(); // shell mode: the agent replaces the in-page panels
     if (!fold || fold === mountedFold) return;
     const cfg = NS.devConfigs && NS.devConfigs[fold];
     if (!cfg) return; // config not registered yet — a later trigger will retry
@@ -116,7 +137,7 @@
   // own Save shortcut alone).
   window.addEventListener('keydown', (e) => {
     if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 's') {
-      if (!NS.devUnlocked) return;
+      if (SHELL || !NS.devUnlocked) return; // shell mode: the shell parent owns Cmd/Ctrl+S
       e.preventDefault();
       saveAll();
     }
@@ -126,7 +147,7 @@
   // the nav toggle's gating). The button lives outside `destroyers`, so a fold
   // change never tears it down.
   let btnShown = false;
-  const showSaveBtn = () => { if (!btnShown) { btnShown = true; document.body.appendChild(saveBtn); } };
+  const showSaveBtn = () => { if (SHELL || btnShown) return; btnShown = true; document.body.appendChild(saveBtn); }; // suppressed in shell mode
   const hideSaveBtn = () => { if (btnShown) { saveBtn.remove(); btnShown = false; } };
   if (NS.devUnlocked) showSaveBtn();
   document.addEventListener('dev:unlocked', showSaveBtn);
