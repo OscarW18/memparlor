@@ -71,4 +71,12 @@
   .fold-heading .fold-title {
     font-size: clamp(1.25rem, 5.5vw, 1.7rem);
   }
+
+  /* The footer would slide up underneath the fixed bar and clash with it, so the
+     bar hides as soon as the footer's top edge enters the viewport (mirrored on
+     <html data-footer-visible> by js/folds.js). Same specificity as the reveal
+     rule above — source order makes this win. */
+  html[data-footer-visible] .fold-heading {
+    display: none;
+  }
 }
