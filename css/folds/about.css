@@ -139,13 +139,5 @@
     padding-right: 0;
   }
 
-  /* Heading pinned to the fold's bottom-right corner (matches the desktop intent). */
-  .about__heading {
-    position: absolute;
-    right: clamp(16px, 5vw, 28px);
-    bottom: clamp(16px, 4vh, 28px);
-    margin: 0;
-    text-align: right;
-    z-index: 3;
-  }
+  /* Heading is the shared fixed bottom bar on mobile — see css/folds/headings.css. */
 }

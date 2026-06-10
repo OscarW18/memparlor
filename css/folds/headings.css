@@ -25,3 +25,50 @@
   letter-spacing: 0.01em;
   color: var(--color-ink);
 }
+
+/* ==========================================================================
+   Mobile (≤768px) — fold heading as a fixed bottom bar
+   On phones each fold's eyebrow + title detaches from the fold and pins to the
+   bottom of the viewport as a persistent, full-width cream bar — a bottom
+   counterpart to the fixed <site-nav> at the top. Only the active fold's heading
+   shows (driven by <html data-fold>, set by js/folds.js): the bar stays put while
+   you scroll and its text swaps as you move between folds, painting over (not
+   reflowing) that fold's content. Home is exempt — it has no .fold-heading.
+   Desktop is unchanged (each fold keeps its own in-flow / sticky heading).
+   ========================================================================== */
+@media (max-width: 768px) {
+  /* Every fold heading is hidden by default; the active one is revealed below. */
+  .fold-heading { display: none; }
+
+  /* Reveal + lay out the active fold's heading as the fixed bottom bar. Pairing
+     html[data-fold="…"] with the per-fold .…__heading class outranks any single
+     per-fold heading rule, so this wins regardless of stylesheet load order. */
+  html[data-fold="about"]    .about__heading,
+  html[data-fold="services"] .services__heading,
+  html[data-fold="process"]  .process__heading,
+  html[data-fold="faqs"]     .faqs__heading,
+  html[data-fold="contact"]  .contact__heading {
+    display: block;
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 90; /* above fold content; below the nav + mobile menu (z-index:100) */
+    margin: 0;
+    padding: clamp(10px, 1.6vh, 16px) clamp(16px, 5vw, 28px);
+    background: var(--color-bg); /* page cream #f7f5e7 */
+    border-top: 1px solid var(--color-ink-hairline);
+    text-align: left;
+    line-height: 1.1;
+  }
+
+  /* Bar-scale typography — the in-flow heading sizes above are too large for a bar. */
+  .fold-heading .fold-eyebrow {
+    font-size: clamp(0.62rem, 2.4vw, 0.78rem);
+    margin-bottom: 0.1em;
+  }
+
+  .fold-heading .fold-title {
+    font-size: clamp(1.25rem, 5.5vw, 1.7rem);
+  }
+}

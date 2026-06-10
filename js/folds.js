@@ -19,9 +19,12 @@
    ========================================================================== */
 
 (() => {
-  // The active section is whichever overlaps this centred band — thin enough that
-  // only one section occupies it at a time except for a brief moment at a boundary.
-  const SPY_MARGIN = '-45% 0px -45% 0px';
+  // The active section is whichever overlaps this band — thin enough that only one
+  // section occupies it at a time except for a brief moment at a boundary. Centred
+  // on the viewport's lower one-third line (top trim 62%, bottom trim 28% → a
+  // ~10%-thick band spanning 62%–72%, i.e. centred at 67%), so a fold becomes active
+  // as it crosses a third of the way up from the bottom rather than the middle.
+  const SPY_MARGIN = '-62% 0px -28% 0px';
 
   let routes = []; // [{ fold, path }] in nav order
   let activeFold = null; // currently-active fold id

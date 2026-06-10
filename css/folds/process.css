@@ -96,8 +96,8 @@
    there while the numbered steps scroll past on the left, then releases once
    the upper text row (.process__top, its containing block) ends — right as the
    video band scrolls into view. The `top` offset matches the fold's top padding
-   so the heading pins in the same spot it rests at. Mobile re-pins it to the
-   fold's bottom-right corner below (position:absolute), so this is desktop-only. */
+   so the heading pins in the same spot it rests at. Mobile detaches it into the
+   shared fixed bottom bar (see css/folds/headings.css), so this is desktop-only. */
 .process__heading {
   position: sticky;
   top: calc(var(--header-h) + clamp(14px, 3vh, 30px));
@@ -171,14 +171,5 @@
     z-index: 2;
   }
 
-  /* Pin the heading to the fold's bottom-right corner (over the video band)
-     rather than dropping it to the top-left. */
-  .process__heading {
-    position: absolute;
-    right: clamp(16px, 5vw, 28px);
-    bottom: clamp(16px, 4vh, 28px);
-    margin: 0;
-    text-align: right;
-    z-index: 3;
-  }
+  /* Heading is the shared fixed bottom bar on mobile — see css/folds/headings.css. */
 }

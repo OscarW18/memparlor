@@ -116,7 +116,7 @@
    sits in the column's flow as the last item; align-self: flex-end keeps it on
    the right, flush to the column's right gutter, and the sticky bottom offset
    matches .faqs__main's bottom padding so it rests in place when nothing scrolls.
-   Mobile re-pins it to the fold's bottom-right corner (position:absolute) below. */
+   Mobile detaches it into the shared fixed bottom bar (see css/folds/headings.css). */
 .faqs__heading {
   position: sticky;
   bottom: clamp(20px, 5vh, 56px);
@@ -151,8 +151,8 @@
 
   .faqs__main {
     /* Centre the Q&A in the lower grid row (undo the desktop flex column / pinned
-       layout). Bottom padding reserves room for the pinned heading so the
-       scrolling list doesn't slide under it. */
+       layout). Bottom padding reserves room for the fixed heading bar so the
+       scrolling list doesn't end underneath it. */
     flex-direction: row;
     align-items: center;
     justify-content: center;
@@ -166,14 +166,5 @@
     margin: 0;
   }
 
-  /* Keep the heading pinned to the bottom-right (here, of the lower grid row,
-     which is the bottom of the fold) rather than dropping it left/in-flow. */
-  .faqs__heading {
-    position: absolute;
-    right: clamp(16px, 5vw, 28px);
-    bottom: clamp(16px, 4vh, 28px);
-    margin: 0;
-    text-align: right;
-    z-index: 3;
-  }
+  /* Heading is the shared fixed bottom bar on mobile — see css/folds/headings.css. */
 }
