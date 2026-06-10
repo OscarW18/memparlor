@@ -80,7 +80,9 @@
   .home__media {
     inset: auto 0 0 0; /* full width, anchored to the bottom edge */
     height: 66.67vh;
-    height: 66.67dvh; /* 2/3 of the (dynamic) viewport */
+    height: 66.67svh; /* 2/3 of the *stable* small viewport — svh (not dvh) so the
+                          band keeps its size when the mobile toolbar hides/shows
+                          mid-scroll instead of jumping. */
   }
 
   /* Fill that band full-width without distorting (cover crops to fit, preserves
