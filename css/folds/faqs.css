@@ -98,19 +98,10 @@
   }
 
   .faqs__main {
-    /* Bottom padding reserves room for the pinned heading so the scrolling list
-       doesn't slide under it. */
+    /* Bottom padding reserves room for the fixed heading bar so the scrolling
+       list doesn't end underneath it. */
     padding: clamp(20px, 6vh, 48px) var(--page-gutter) clamp(4.5rem, 13vh, 7rem);
   }
 
-  /* Keep the heading pinned to the bottom-right (here, of the lower grid row,
-     which is the bottom of the fold) rather than dropping it left/in-flow. */
-  .faqs__heading {
-    position: absolute;
-    right: clamp(16px, 5vw, 28px);
-    bottom: clamp(16px, 4vh, 28px);
-    margin: 0;
-    text-align: right;
-    z-index: 3;
-  }
+  /* Heading is the shared fixed bottom bar on mobile — see css/folds/headings.css. */
 }
