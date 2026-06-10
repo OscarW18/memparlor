@@ -4,11 +4,13 @@
    (italic serif), the right Calendly inline embed (shared createMedia's new
    `calendly` type), and the bottom-right heading (shared createHeading).
 
-   The embed is lazy: createMedia returns { activate, deactivate } and we wire
-   them to the controller via registerFold — identical to the About/Process
-   videos — so the Calendly script is fetched only on the first enter, not on
-   page load. With an empty `url` the embed renders a neutral placeholder and the
-   script is never loaded.
+   The embed loads in the background: createMedia schedules its init on the
+   shared media preload (after the page load event, at idle — same as the fold
+   videos), so the iframe is ready before the visitor reaches this fold. The
+   registerFold wiring below stays as the early trigger for deep-links /
+   fast scrolls (activation is guarded, so whichever fires first wins). With an
+   empty `url` the embed renders a neutral placeholder and the script is never
+   loaded.
    ========================================================================== */
 
 (async () => {
