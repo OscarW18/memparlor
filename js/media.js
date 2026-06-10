@@ -136,8 +136,11 @@
       return null;
     }
 
-    // Calendly inline embed. Build the container now; defer the third-party
-    // script + widget init to the first activation (see js/contact.js).
+    // Calendly inline embed. Build the container now; the third-party script +
+    // widget init run via the same background preload as the videos (after the
+    // page load event, at idle), so the iframe is ready before the visitor
+    // reaches the fold. Entering the fold first still works — activation and
+    // the preload share the `inited` guard.
     if (media.type === 'calendly') {
       const hasUrl = typeof media.url === 'string' && media.url !== '';
 
@@ -159,26 +162,29 @@
       const initWidget = () => {
         window.Calendly?.initInlineWidget?.({ url: media.url, parentElement: widget });
       };
+      const activate = () => {
+        if (inited) return; // init exactly once, whichever trigger comes first
+        inited = true;
+        if (window.Calendly) {
+          initWidget();
+          return;
+        }
+        const existing = document.querySelector(`script[src="${SCRIPT_SRC}"]`);
+        if (existing) {
+          existing.addEventListener('load', initWidget, { once: true });
+          return;
+        }
+        const s = document.createElement('script');
+        s.src = SCRIPT_SRC;
+        s.async = true;
+        s.addEventListener('load', initWidget, { once: true });
+        document.head.appendChild(s);
+      };
+
+      schedulePreload(activate);
 
       return {
-        activate() {
-          if (inited) return; // init exactly once on the first enter
-          inited = true;
-          if (window.Calendly) {
-            initWidget();
-            return;
-          }
-          const existing = document.querySelector(`script[src="${SCRIPT_SRC}"]`);
-          if (existing) {
-            existing.addEventListener('load', initWidget, { once: true });
-            return;
-          }
-          const s = document.createElement('script');
-          s.src = SCRIPT_SRC;
-          s.async = true;
-          s.addEventListener('load', initWidget, { once: true });
-          document.head.appendChild(s);
-        },
+        activate,
         deactivate() {}, // iframe persists in the hidden fold — nothing to tear down
       };
     }
