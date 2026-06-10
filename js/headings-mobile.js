@@ -13,9 +13,10 @@
    the viewport returns to desktop. The renderers (js/about.js etc.) look the
    element up by data attribute, so moving the node is transparent to them.
 
-   The fixed <site-nav> auto-hides on mobile: any downward scroll hides it
-   (html[data-nav-hidden] → translateY(-100%), css/base.css), any upward scroll
-   reveals it. While visible, a pinned heading sticks BELOW it (top: --nav-h,
+   The fixed <site-nav> auto-hides on mobile: sustained downward scroll hides
+   it (html[data-nav-hidden] → translateY(-100%), css/base.css), sustained
+   upward scroll reveals it — with hysteresis so touch jitter can't flicker
+   it. While visible, a pinned heading sticks BELOW it (top: --nav-h,
    measured from the rendered bar — it can run taller than the --header-h
    token); while hidden, the heading slides up to top: 0. The nav never hides
    while the hamburger menu is open or at the very top of the page.
@@ -43,7 +44,16 @@
     slots.forEach(({ el, parent, next }) => parent.insertBefore(el, next));
 
   // --- Scroll handling (rAF-throttled): nav auto-hide + stuck detection ------
+  // Touch scrolling jitters (finger tremor, fractional scrollY, momentum
+  // micro-corrections), so the nav toggles on accumulated travel in one
+  // direction — not frame-to-frame deltas. A direction reversal resets the
+  // accumulator; only sustained travel past the threshold flips the nav.
+  // Revealing is more eager than hiding: "scroll up a little" should bring
+  // the nav back, while a stray wobble mid-read shouldn't take it away.
+  const HIDE_AFTER = 24; // px of accumulated downward travel
+  const SHOW_AFTER = 12; // px of accumulated upward travel
   let lastY = 0;
+  let travel = 0; // signed: + down, − up; resets on direction change
   let navH = 0;
   let ticking = false;
 
@@ -58,18 +68,25 @@
 
     // Teleports (deep-link jump, popstate, scroll restoration) are not a scroll
     // direction — resync without toggling the nav.
-    const teleport = Math.abs(y - lastY) > window.innerHeight;
+    const delta = y - lastY;
+    const teleport = Math.abs(delta) > window.innerHeight;
+    lastY = y;
 
-    // Nav: hide on downward scroll, reveal on upward; always shown at the very
-    // top; never hidden while the hamburger menu is open.
+    // Accumulate travel while the direction holds; a reversal starts over.
+    if (teleport) travel = 0;
+    else if (delta > 0) travel = travel > 0 ? travel + delta : delta;
+    else if (delta < 0) travel = travel < 0 ? travel + delta : delta;
+
+    // Nav: hide after sustained downward travel, reveal after sustained upward
+    // travel; always shown at the very top; never hidden while the hamburger
+    // menu is open.
     if (navEl?.classList.contains('is-open') || y < 8) {
       html.removeAttribute('data-nav-hidden');
-    } else if (!teleport && y > lastY + 2) {
+    } else if (travel > HIDE_AFTER) {
       html.setAttribute('data-nav-hidden', '');
-    } else if (!teleport && y < lastY - 2) {
+    } else if (travel < -SHOW_AFTER) {
       html.removeAttribute('data-nav-hidden');
     }
-    lastY = y;
 
     // Stuck detection: a heading is pinned once its top edge reaches its sticky
     // offset (0 with the nav hidden / navH with it shown). +1 tolerates subpixel
@@ -105,6 +122,7 @@
     toMobile();
     measureNav();
     lastY = Math.max(0, window.scrollY);
+    travel = 0;
     window.addEventListener('scroll', onScroll, { passive: true });
     window.addEventListener('resize', onResize);
     update();
